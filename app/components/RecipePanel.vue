@@ -1,0 +1,70 @@
+<script lang="ts" setup>
+import { storeToRefs } from 'pinia'
+
+const rStore = useRecipeStore()
+
+const { selectedStuff, curTool } = storeToRefs(rStore)
+
+const showSearchInput = ref(false)
+
+const showTooltip = computed(() => !selectedStuff.value.length && !curTool.value)
+</script>
+
+<template>
+  <div
+    class="recipe-panel relative shadow transition hover:shadow-md"
+    m="x-2 y-4" p="2"
+    bg="gray-400/8"
+  >
+    <RecipePanelTitle />
+
+    <ToggleMode />
+
+    <div class="cook-recipes" p="2">
+      <SearchFoodInput v-if="showSearchInput" />
+
+      <Transition mode="out-in">
+        <span v-if="showTooltip" text="sm" p="2">
+          选口锅吧
+        </span>
+
+        <div
+          v-else-if="rStore.isSearching"
+          relative flex items-center justify-center p-6
+          text-xl
+        >
+          <div class="magnifying-glass" i-ri-search-line inline-flex />
+        </div>
+
+        <div v-else-if="rStore.displayedRecipe.length">
+          <DishTag v-for="item, i in rStore.displayedRecipe" :key="i" :dish="item" />
+        </div>
+
+        <div v-else text="sm">
+          <span>还没有完美匹配的菜谱呢……</span>
+          <br>
+          <span>大胆尝试一下，或者</span>
+          <a href="#" @click="rStore.reset()">
+            <strong>换个组合</strong>
+          </a>
+        </div>
+      </Transition>
+    </div>
+  </div>
+</template>
+
+<style>
+@keyframes circle-rotate {
+  from {
+    transform: rotate(0turn) translateY(60%) rotate(1turn);
+  }
+  to {
+    transform: rotate(1turn) translateY(60%) rotate(0turn);
+  }
+}
+
+.magnifying-glass {
+  margin: auto;
+  animation: circle-rotate 4s linear infinite;
+}
+</style>
